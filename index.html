@@ -4,9 +4,153 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Student</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css" integrity="sha512-SbiR/eusphKoMVVXysTKG/7VseWii+Y3FdHrt0EpKgpToZeemhqHeZeLWLhJutz/2ut2Vw1uQEj2MbRF+TVBUA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css" integrity="sha512-SgaqKKxJDQ/tAUAAXzvxZz33rmn7leYDYfBP+YoMRSENhf3zJyx3SBASt/OfeQwBHA1nxMis7mM3EV/oYT6Fdw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-    
+    <div class="container">
+        <h1 class="text-center">Students Information</h1>
+        <div>
+            <div class="mb-3">
+            <label for="Studno">Student ID</label>
+            <input  placeholder="student No." type="text" class="form-control" name="studno" id="studno" readonly>
+            </div>
+            <div class="mb-3">
+              <label for="first_name">First name</label>
+              <input type="text"  placeholder="First name" class="form-control" name="first_name" autocomplete="off" id="first_name" required>
+            </div>
+            <div class="mb-3">
+              <label for="last_name">Last name</label>
+               <input type="text"  placeholder="Last name" class="form-control" name="last_name" autocomplete="off" id="last_name" required>
+            </div>
+      
+            <div class="mb-3">
+              <label for="birth_date">Birth date</label>
+            </div>
+            <div class="input-group mb-3">
+              <input type="text" placeholder="Birthdate" class="form-control" name="birth_date" autocomplete="off" id="birth_date"  required>
+            </div>
+        </div>
+        <button  class="btn btn-outline-secondary mb-5" onclick="add_record()">Add Student</button>
+        </div>
+   </div>      
+   <h2 class="text-center">Student Table</h2>
+      <table class="table table-striped">
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">First Name</th>
+            <th scope="col">Last Name</th>
+            <th scope="col">Birth Date</th>
+          </tr>
+        <tbody id="student">
+        </tbody>
+      </table>
+      <div class="col-md-12 text-center">
+        <button class="btn btn-primary " onclick="update_record()">Update</button>
+        <button class="btn btn-danger " onclick="delete_record()" >Delete</button>
+      </div>
+  </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.js" integrity="sha512-6DC1eE3AWg1bgitkoaRM1lhY98PxbMIbhgYCGV107aZlyzzvaWCW1nJW2vDuYQm06hXrW0As6OGKcIaAVWnHJw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.min.js" integrity="sha512-wOLiP6uL5tNrV1FiutKtAyQGGJ1CWAsqQ6Kp2XZ12/CvZxw8MvNJfdhh0yTwjPIir4SWag2/MHrseR7PRmNtvA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+        $(document).ready(function() {
+            $.ajax({
+                url: "http:/FinalExam/student",
+                method: "GET", 
+                success: function(response) {
+                    txt = "";
+                    for(var item of response){
+                        txt += 
+                        `
+                        <tr>
+                            <th scope="row">${item.id}</th>
+                            <td>${item.first_name}</td>
+                            <td>${item.last_name}</td>
+                            <td>${item.birth_date}</td>
+                            <td>
+                              <button class="btn btn-outline-dark btn-sm" onclick="select_record(${item.id})">Select</button>
+                            </td>
+                        </tr>
+                        
+                        `;
+                        document.getElementById("student").innerHTML = txt;
+                    }
+                },
+            })
+        });
+  
+        function add_record() {
+              var values = {
+                  first_name : document.getElementById("first_name").value,
+                  last_name : document.getElementById("last_name").value,
+                  birth_date : document.getElementById("birth_date").value,
+              }
+              $(document).ready(function() {
+                    $.ajax({
+                        url: "http://FinalExam/student/add",
+                        method: "POST",
+                        data: JSON.stringify(values),
+                        complete: function(response) {
+                            alert(`Student was added`);
+                            document.location.reload();
+                        },
+                    });
+                  })
+          }
+          
+        function select_record(id) {
+              $.ajax({
+                  url: `http://FinalExam/student/${id}`,
+                  method: "GET",
+                  success: function(response) {
+                    for(var item of response){
+                      document.getElementById("studno").value = item.id;
+                      document.getElementById("first_name").value = item.first_name;
+                      document.getElementById("last_name").value = item.last_name;
+                      document.getElementById("birth_date").value = item.birth_date;
+  
+                    }
+                  },
+              });
+          }
+  
+          function update_record(){
+            var studno = document.getElementById("studno").value
+            var values = {
+                  first_name : document.getElementById("first_name").value,
+                  last_name : document.getElementById("last_name").value,
+                  birth_date : document.getElementById("birth_date").value,
+            }
+            $.ajax({
+                url: `http://FinalExam/student/edit/${studno}`,
+                method: "PUT",
+                data: JSON.stringify(values),
+                complete: function(response) {
+                  alert(`Student ${studno} was updated`);
+                  document.location.reload();
+  
+                },
+  
+            });
+        }
+  
+          function delete_record() {
+              var studno = document.getElementById("studno").value
+              $(document).ready(function() {
+                    $.ajax({
+                        url: `http://FinalExam/student/delete/${studno}`,
+                        method: "DELETE",
+                        complete: function(response) {
+                            alert(`Student ${studno} was deleted`);
+                            document.location.reload();
+                        },
+                    });
+                  })
+          }
+      </script>
+
+
 </body>
-</html>
+</html> 
